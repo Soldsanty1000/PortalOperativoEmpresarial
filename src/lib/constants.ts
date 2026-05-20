@@ -1,0 +1,16 @@
+export const GIROS = [
+  "Alimentos y bebidas",
+  "Bienes raíces",
+  "Comunicación y marketing",
+  "Construcción",
+  "Consultoría",
+  "Educación",
+  "Legal",
+  "Manufactura",
+  "Retail / Comercio",
+  "Salud",
+  "Servicios financieros",
+  "Tecnología",
+  "Transporte y logística",
+  "Turismo y hospitalidad",
+] as const;
