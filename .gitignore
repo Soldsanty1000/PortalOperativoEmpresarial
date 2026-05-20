@@ -14,3 +14,4 @@ yarn-error.log*
 .vscode/
 dist/
 build/
+.env.local.example
