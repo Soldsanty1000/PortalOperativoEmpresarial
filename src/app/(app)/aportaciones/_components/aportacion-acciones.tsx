@@ -1,34 +1,28 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { validarAportacion, getComprobanteSignedUrl } from "@/app/actions/aportaciones";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { Eye, Loader2, X, ExternalLink } from "lucide-react";
 
 export function VerComprobanteButton({ path }: { path: string | null }) {
   const [loading, setLoading] = useState(false);
+  const [url, setUrl] = useState<string | null>(null);
 
   if (!path) return <span className="text-xs text-muted-foreground">Sin comprobante</span>;
 
+  const isPdf = path.toLowerCase().endsWith(".pdf");
+
   async function abrir() {
-    // Abrir ventana SINCRÓNICAMENTE durante el click (Chrome bloquea si window.open
-    // se ejecuta después de await — pierde el user gesture context)
-    const win = window.open("about:blank", "_blank");
     setLoading(true);
     try {
       const res = await getComprobanteSignedUrl(path!);
-      if ("url" in res && res.url) {
-        if (win) win.location.href = res.url;
-        else window.location.href = res.url; // fallback si bloqueado
-      } else {
-        if (win) win.close();
-        alert("Error: " + ((res as any).error ?? "desconocido"));
-      }
+      if ("url" in res && res.url) setUrl(res.url);
+      else alert("Error: " + ((res as any).error ?? "desconocido"));
     } catch (e: any) {
-      if (win) win.close();
       alert("Excepción: " + (e?.message ?? String(e)));
     } finally {
       setLoading(false);
@@ -36,10 +30,62 @@ export function VerComprobanteButton({ path }: { path: string | null }) {
   }
 
   return (
-    <Button size="sm" variant="outline" onClick={abrir} disabled={loading}>
-      {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <ExternalLink className="h-3 w-3 mr-1" />}
-      Ver comprobante
-    </Button>
+    <>
+      <Button size="sm" variant="outline" onClick={abrir} disabled={loading}>
+        {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Eye className="h-3 w-3 mr-1" />}
+        Ver comprobante
+      </Button>
+      {url && (
+        <ComprobanteModal url={url} isPdf={isPdf} onClose={() => setUrl(null)} />
+      )}
+    </>
+  );
+}
+
+function ComprobanteModal({ url, isPdf, onClose }: { url: string; isPdf: boolean; onClose: () => void }) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="absolute top-4 right-4 flex gap-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={(e) => { e.stopPropagation(); window.open(url, "_blank", "noopener,noreferrer"); }}
+        >
+          <ExternalLink className="h-4 w-4 mr-1" />
+          Abrir en pestaña
+        </Button>
+        <Button size="sm" variant="secondary" onClick={onClose}>
+          <X className="h-4 w-4 mr-1" />
+          Cerrar (Esc)
+        </Button>
+      </div>
+      <div
+        className="max-w-[95vw] max-h-[90vh] w-full h-full flex items-center justify-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {isPdf ? (
+          <iframe src={url} className="w-full h-full bg-white rounded-md" title="Comprobante" />
+        ) : (
+          <img src={url} alt="Comprobante" className="max-w-full max-h-full object-contain rounded-md" />
+        )}
+      </div>
+    </div>
   );
 }
 
