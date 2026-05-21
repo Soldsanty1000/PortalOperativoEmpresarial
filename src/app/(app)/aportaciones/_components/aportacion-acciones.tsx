@@ -14,11 +14,23 @@ export function VerComprobanteButton({ path }: { path: string | null }) {
   if (!path) return <span className="text-xs text-muted-foreground">Sin comprobante</span>;
 
   async function abrir() {
+    console.log("[comprobante] click, path:", path);
     setLoading(true);
-    const res = await getComprobanteSignedUrl(path!);
-    setLoading(false);
-    if ("url" in res && res.url) window.open(res.url, "_blank", "noopener,noreferrer");
-    else alert(res.error ?? "Error");
+    try {
+      const res = await getComprobanteSignedUrl(path!);
+      console.log("[comprobante] respuesta:", res);
+      if ("url" in res && res.url) {
+        const win = window.open(res.url, "_blank", "noopener,noreferrer");
+        if (!win) alert("Popup bloqueado. Permite popups para este sitio.");
+      } else {
+        alert("Error al generar URL: " + ((res as any).error ?? "desconocido"));
+      }
+    } catch (e: any) {
+      console.error("[comprobante] excepción:", e);
+      alert("Excepción: " + (e?.message ?? String(e)));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
