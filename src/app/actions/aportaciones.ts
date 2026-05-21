@@ -25,21 +25,9 @@ export async function crearAportacion(formData: FormData) {
 
   if (!parsed.success) return { error: parsed.error.errors[0].message };
 
-  // 1) Insertar fila inicial (sin comprobante todavía)
-  const { data: aport, error: insertError } = await supabase
-    .from("aportaciones")
-    .insert({
-      ...parsed.data,
-      miembro_id: miembro.id,
-      plaza_id: miembro.plaza_id,
-      estado: "por_validar",
-    })
-    .select("id")
-    .single();
-
-  if (insertError || !aport) return { error: insertError?.message ?? "Error al crear" };
-
-  // 2) Upload del comprobante (si existe)
+  // 1) Validar + subir comprobante PRIMERO (si existe). Evita UPDATE post-insert
+  //    que sería bloqueado por RLS (dueño no puede update su propia aportación).
+  let comprobante_url: string | undefined;
   const file = formData.get("comprobante") as File | null;
   if (file && file.size > 0) {
     if (file.size > MAX_FILE_BYTES) {
@@ -50,18 +38,40 @@ export async function crearAportacion(formData: FormData) {
     }
 
     const ext = file.name.split(".").pop() ?? "bin";
-    const path = `${miembro.id}/${aport.id}/comprobante.${ext}`;
+    const aportId = crypto.randomUUID();
+    const path = `${miembro.id}/${aportId}/comprobante.${ext}`;
 
     const { error: uploadError } = await supabase.storage
       .from("comprobantes")
       .upload(path, file, { upsert: true, contentType: file.type });
 
-    if (uploadError) {
-      await supabase.from("aportaciones").delete().eq("id", aport.id);
-      return { error: `Upload: ${uploadError.message}` };
-    }
+    if (uploadError) return { error: `Upload: ${uploadError.message}` };
+    comprobante_url = path;
 
-    await supabase.from("aportaciones").update({ comprobante_url: path }).eq("id", aport.id);
+    // 2) Insert con id pre-generado + comprobante_url ya incluido
+    const { error: insertError } = await supabase.from("aportaciones").insert({
+      id: aportId,
+      ...parsed.data,
+      miembro_id: miembro.id,
+      plaza_id: miembro.plaza_id,
+      estado: "por_validar",
+      comprobante_url,
+    });
+
+    if (insertError) {
+      // Rollback: borrar archivo subido
+      await supabase.storage.from("comprobantes").remove([path]);
+      return { error: insertError.message };
+    }
+  } else {
+    // Sin archivo: insert directo
+    const { error: insertError } = await supabase.from("aportaciones").insert({
+      ...parsed.data,
+      miembro_id: miembro.id,
+      plaza_id: miembro.plaza_id,
+      estado: "por_validar",
+    });
+    if (insertError) return { error: insertError.message };
   }
 
   revalidatePath("/aportaciones");

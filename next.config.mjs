@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   typescript: { ignoreBuildErrors: true },
+  experimental: {
+    serverActions: { bodySizeLimit: '10mb' },
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**.supabase.co' },
