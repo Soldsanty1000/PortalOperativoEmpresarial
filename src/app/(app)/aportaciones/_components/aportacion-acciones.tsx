@@ -14,19 +14,21 @@ export function VerComprobanteButton({ path }: { path: string | null }) {
   if (!path) return <span className="text-xs text-muted-foreground">Sin comprobante</span>;
 
   async function abrir() {
-    console.log("[comprobante] click, path:", path);
+    // Abrir ventana SINCRÓNICAMENTE durante el click (Chrome bloquea si window.open
+    // se ejecuta después de await — pierde el user gesture context)
+    const win = window.open("about:blank", "_blank");
     setLoading(true);
     try {
       const res = await getComprobanteSignedUrl(path!);
-      console.log("[comprobante] respuesta:", res);
       if ("url" in res && res.url) {
-        const win = window.open(res.url, "_blank", "noopener,noreferrer");
-        if (!win) alert("Popup bloqueado. Permite popups para este sitio.");
+        if (win) win.location.href = res.url;
+        else window.location.href = res.url; // fallback si bloqueado
       } else {
-        alert("Error al generar URL: " + ((res as any).error ?? "desconocido"));
+        if (win) win.close();
+        alert("Error: " + ((res as any).error ?? "desconocido"));
       }
     } catch (e: any) {
-      console.error("[comprobante] excepción:", e);
+      if (win) win.close();
       alert("Excepción: " + (e?.message ?? String(e)));
     } finally {
       setLoading(false);

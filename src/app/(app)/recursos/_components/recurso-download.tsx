@@ -8,11 +8,20 @@ import { Download, Trash2, Loader2 } from "lucide-react";
 export function DescargarRecursoBtn({ path }: { path: string }) {
   const [loading, setLoading] = useState(false);
   async function abrir() {
+    const win = window.open("about:blank", "_blank");
     setLoading(true);
-    const res = await getRecursoSignedUrl(path);
-    setLoading(false);
-    if ("url" in res && res.url) window.open(res.url, "_blank", "noopener,noreferrer");
-    else alert(res.error ?? "Error");
+    try {
+      const res = await getRecursoSignedUrl(path);
+      if ("url" in res && res.url) {
+        if (win) win.location.href = res.url;
+        else window.location.href = res.url;
+      } else {
+        if (win) win.close();
+        alert((res as any).error ?? "Error");
+      }
+    } finally {
+      setLoading(false);
+    }
   }
   return (
     <Button size="sm" variant="outline" onClick={abrir} disabled={loading}>
