@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/form-field";
 import { SubmitButton } from "@/components/submit-button";
 import { crearEncuentro } from "@/app/actions/encuentros";
+import { asFormAction } from "@/lib/form-action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -26,7 +27,7 @@ export default async function NuevoEncuentroPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <form action={crearEncuentro} className="space-y-4">
+          <form action={asFormAction(crearEncuentro)} className="space-y-4">
             {miembro.rol === "admin" && (
               <FormField label="Plaza" htmlFor="plaza_id">
                 <Select id="plaza_id" name="plaza_id" required>

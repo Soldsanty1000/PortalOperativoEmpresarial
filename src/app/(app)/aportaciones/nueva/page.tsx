@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/form-field";
 import { SubmitButton } from "@/components/submit-button";
 import { crearAportacion } from "@/app/actions/aportaciones";
+import { asFormAction } from "@/lib/form-action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -22,7 +23,7 @@ export default async function NuevaAportacionPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <form action={crearAportacion} className="space-y-4" encType="multipart/form-data">
+          <form action={asFormAction(crearAportacion)} className="space-y-4" encType="multipart/form-data">
             <div className="grid grid-cols-2 gap-4">
               <FormField label="Tipo" htmlFor="tipo">
                 <Select id="tipo" name="tipo" required defaultValue="membresia">

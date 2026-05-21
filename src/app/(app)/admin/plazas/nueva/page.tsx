@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/form-field";
 import { SubmitButton } from "@/components/submit-button";
 import { crearPlaza } from "@/app/actions/plazas";
+import { asFormAction } from "@/lib/form-action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +18,7 @@ export default async function NuevaPlazaPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <form action={crearPlaza} className="space-y-4">
+          <form action={asFormAction(crearPlaza)} className="space-y-4">
             <FormField label="Nombre" htmlFor="nombre" hint="Ej: Plaza Querétaro">
               <Input id="nombre" name="nombre" required minLength={2} />
             </FormField>

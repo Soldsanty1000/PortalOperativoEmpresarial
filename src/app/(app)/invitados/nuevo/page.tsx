@@ -8,6 +8,7 @@ import { FormField } from "@/components/form-field";
 import { GiroSelect } from "@/components/giro-select";
 import { SubmitButton } from "@/components/submit-button";
 import { crearInvitado } from "@/app/actions/invitados";
+import { asFormAction } from "@/lib/form-action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -20,7 +21,7 @@ export default async function NuevoInvitadoPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <form action={crearInvitado} className="space-y-4">
+          <form action={asFormAction(crearInvitado)} className="space-y-4">
             <FormField label="Nombre" htmlFor="nombre">
               <Input id="nombre" name="nombre" required minLength={2} />
             </FormField>

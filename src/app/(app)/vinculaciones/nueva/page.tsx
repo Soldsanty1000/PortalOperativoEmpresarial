@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/form-field";
 import { SubmitButton } from "@/components/submit-button";
 import { crearVinculacion } from "@/app/actions/vinculaciones";
+import { asFormAction } from "@/lib/form-action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -29,7 +30,7 @@ export default async function NuevaVinculacionPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <form action={crearVinculacion} className="space-y-4">
+          <form action={asFormAction(crearVinculacion)} className="space-y-4">
             <FormField label="Para (miembro)" htmlFor="para_miembro_id">
               <Select id="para_miembro_id" name="para_miembro_id" required>
                 <option value="">— Selecciona —</option>

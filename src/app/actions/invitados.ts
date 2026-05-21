@@ -39,7 +39,7 @@ export async function actualizarEstatusInvitado(id: string, estatus: string) {
   await requireAuth();
   const supabase = createClient();
 
-  const { error } = await supabase.from("invitados").update({ estatus }).eq("id", id);
+  const { error } = await supabase.from("invitados").update({ estatus: estatus as any }).eq("id", id);
   if (error) return { error: error.message };
 
   revalidatePath("/invitados");

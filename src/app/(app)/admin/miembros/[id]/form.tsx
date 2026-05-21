@@ -38,7 +38,7 @@ export function EditarMiembroForm({ miembro, plazas }: { miembro: any; plazas: P
     setResetPwd(null);
     const res = await resetPasswordMiembro(miembro.id);
     if ("error" in res && res.error) setError(res.error);
-    else if ("passwordTemp" in res) setResetPwd(res.passwordTemp);
+    else if ("passwordTemp" in res && res.passwordTemp) setResetPwd(res.passwordTemp);
   }
 
   return (

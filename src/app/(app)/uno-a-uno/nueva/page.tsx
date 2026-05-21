@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/form-field";
 import { SubmitButton } from "@/components/submit-button";
 import { crearUnoAUno } from "@/app/actions/uno-a-uno";
+import { asFormAction } from "@/lib/form-action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -28,7 +29,7 @@ export default async function NuevoUnoAUnoPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <form action={crearUnoAUno} className="space-y-4">
+          <form action={asFormAction(crearUnoAUno)} className="space-y-4">
             <FormField label="Con quién" htmlFor="con_quien_id">
               <Select id="con_quien_id" name="con_quien_id" required>
                 <option value="">— Selecciona —</option>

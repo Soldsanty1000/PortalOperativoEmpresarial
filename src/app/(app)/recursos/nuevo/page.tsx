@@ -6,6 +6,7 @@ import { Select } from "@/components/ui/select";
 import { FormField } from "@/components/form-field";
 import { SubmitButton } from "@/components/submit-button";
 import { crearRecurso } from "@/app/actions/recursos";
+import { asFormAction } from "@/lib/form-action";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -18,7 +19,7 @@ export default async function NuevoRecursoPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <form action={crearRecurso} className="space-y-4" encType="multipart/form-data">
+          <form action={asFormAction(crearRecurso)} className="space-y-4" encType="multipart/form-data">
             <FormField label="Nombre" htmlFor="nombre">
               <Input id="nombre" name="nombre" required minLength={2} />
             </FormField>
